@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金城総合病院 院内サイト検索</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #ffffff;
+  color: #111;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header .logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1a4f8a;
+  margin-bottom: 14px;
+}
+
+.header .logo-mark svg {
+  width: 26px;
+  height: 26px;
+  fill: #ffffff;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a4f8a;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.header .subtitle {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  letter-spacing: 0.08em;
+}
+
+.search-area {
+  width: 100%;
+  max-width: 560px;
+}
+
+.search-box {
+  display: flex;
+  gap: 0;
+  border: 1.5px solid #1a4f8a;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(26,79,138,0.08);
+}
+
+.search-box input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 15px;
+  border: none;
+  outline: none;
+  color: #111;
+  background: transparent;
+  font-family: inherit;
+}
+
+.search-box input::placeholder { color: #aaa; }
+
+.search-box button {
+  padding: 0 20px;
+  background: #1a4f8a;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+}
+
+.search-box button:hover { background: #163f70; }
+
+.hint {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 18px;
+}
+
+.results {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.result-card {
+  background: #fff;
+  border: 1px solid #e0e8f4;
+  border-left: 4px solid #1a4f8a;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+
+.result-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a4f8a;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.result-title:hover { text-decoration: underline; }
+
+.result-url {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.result-desc {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.7;
+}
+
+.no-result {
+  text-align: center;
+  padding: 2rem;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.footer {
+  margin-top: 3rem;
+  font-size: 11px;
+  color: #ccc;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
+    </svg>
+  </div>
+  <h1>金城総合病院<br>院内サイト検索</h1>
+  <p class="subtitle">KANESHIRO GENERAL HOSPITAL — INTRANET SEARCH</p>
+</div>
+
+<div class="search-area">
+  <div class="search-box">
+    <input type="text" id="q" placeholder="キーワードを入力..." onkeydown="if(event.key==='Enter')doSearch()">
+    <button onclick="doSearch()">検索</button>
+  </div>
+  <p class="hint" id="hint"></p>
+</div>
+
+<div class="results" id="results"></div>
+
+<div class="footer">※このサイトはフィクションで、実在する個人・団体とは関係ありません。<br>© RA_0930</div>
+
+<script>
+const db = [
+  {
+    keywords: ["金城幸次"],
+    title: "男性医師殺害事件_関連資料_い",
+    url: "https://drive.google.com/file/d/18oBxjsfXezn7O-LSY6bY2F6nyeeqbc7q/view?usp=drive_link",
+    desc: "事件資料のため、閲覧制限アリ(6/35)"
+  },
+  {
+    keywords: ["金城祐希"],
+    title: "金城総合病院_院長記録",
+    url: "https://drive.google.com/file/d/1BbOeu_nEwob104zYg6L_a3035TLL51l1/view?usp=sharing",
+    desc: "金城総合病院の院長についての記録(5/35)"
+  },
+  {
+    keywords: ["人を救う魔法"],
+    title: "人を救う魔法_レビュー",
+    url: "https://sites.google.com/view/bookreview-yuki-kaneshiro/%E3%83%9B%E3%83%BC%E3%83%A0",
+    desc: "書籍レビュー記録(6/35)"
+  },
+{
+    keywords: ["桶川涼"],
+    title: "宗教法人「解放の鍵」",
+    url: "https://sites.google.com/view/kaihounokagi-4th/%E3%83%9B%E3%83%BC%E3%83%A0",
+    desc: "第4期入団員について(7/35)"
+  },
+{
+    keywords: ["解放の鍵"],
+    title: "宗教法人「解放の鍵」",
+    url: "https://sites.google.com/view/kaihounokagi/%E3%83%9B%E3%83%BC%E3%83%A0"
+    desc: "団員専用ページ(8/35)"
+  },
+{
+    keywords: ["渡辺将太"],
+    title: "個人情報_被験者No.6",
+    url: "https://sites.google.com/view/hikensya-sw/%E3%83%9B%E3%83%BC%E3%83%A0"
+    desc: "被験者情報(10/35)"
+  },
+{
+    keywords: ["再臨の儀式"],
+    title: "再臨の儀式について",
+    url: "https://drive.google.com/file/d/1mmNsPWscytsLvs8YhZEbzYlA932CTBc2/view?usp=sharing"
+    desc: "方法を記す。(9/35)"
+  },
+{
+    keywords: ["SW20010611"],
+    title: "金城総合病院_入院者情報",
+    url: "https://sites.google.com/view/kaneshiro-hospital-inf/%E3%83%9B%E3%83%BC%E3%83%A0",
+    desc: "SW20010711の入院情報(11/35)"
+  },
+{
+    keywords: ["ナギサ様"],
+    title: "カグラナギサ",
+    url: "https://sites.google.com/view/kaihounokagi-kagura/%E3%83%9B%E3%83%BC%E3%83%A0",
+    desc: "(19/35)"
+  },
+{
+    keywords: ["女子高生落下事故"],
+    title: "女子高生、ビルから落下か。自殺の疑い"
+    url: "https://sites.google.com/view/news365days-kaguranagisa/%E3%83%9B%E3%83%BC%E3%83%A0",
+    desc: "女子高生落下事故に関する記事(20/35)"
+  },
+{
+    keywords: ["金城汀"],
+    title: "問診完了_金城総合病院",
+    url: "https://sites.google.com/view/kaneshiro-hospital-clear/%E3%83%9B%E3%83%BC%E3%83%A0",
+    desc: "問診表記入へのご協力、ありがとうございました。(31/35)"
+  }
+];
+
+function doSearch() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const hint = document.getElementById('hint');
+  const results = document.getElementById('results');
+  if (!q) { hint.textContent = ''; results.innerHTML = ''; return; }
+  const matched = db.filter(e => e.keywords.some(k => q.includes(k) || k.includes(q)));
+  if (!matched.length) {
+    hint.textContent = `「${q}」に一致する情報は見つかりませんでした`;
+    results.innerHTML = '<div class="no-result">該当する院内情報はありません</div>';
+    return;
+  }
+  hint.textContent = `${matched.length}件の情報が見つかりました`;
+  results.innerHTML = matched.map(e => `
+    <div class="result-card">
+      <a class="result-title" href="${e.url}" target="_blank">${e.title}</a>
+      <div class="result-url">${e.url}</div>
+      <div class="result-desc">${e.desc}</div>
+    </div>
+  `).join('');
+}
+</script>
+
+</body>
+</html>
